@@ -1,0 +1,52 @@
+service: reviewdb
+
+frameworkVersion: ">= 1.6.0 <2.0.0"
+
+provider:
+  name: aws
+  runtime: python3.7
+  stage: dev
+  region: us-east-1
+  iamRoleStatements:
+  - Effect: Allow
+    Action:
+      - dynamodb:Query
+      - dynamodb:GetItem
+      - dynamodb:PutItem
+    Resource: "arn:aws:dynamodb:us-east-1:603301334685:table/reviews_tbl"
+
+functions:
+  create:
+    handler: create.handler
+    events:
+      - http:
+          path: reviews
+          method: post
+  read:
+    handler: read.handler
+    events:
+      - http:
+          path: reviews/{review_hash}
+          method: get
+  # fetch:
+  #   handler: fetch.handler
+  #   events:
+  #     - http:
+  #         path: reviews/{fetch}
+  #         method: get
+
+# resources:
+#   Resources:
+#     ReviewsTable:
+#       Type: AWS::DynamoDB::Table
+#       Properties:
+#         TableName: reviews_tbl
+#         AttributeDefinitions:
+#           - AttributeName: hashtag
+#             AttributeType: S
+#         KeySchema:
+#           - AttributeName: hashtag
+#             KeyType: HASH
+#         ProvisionedThroughput:
+#           ReadCapacityUnits: 1
+#           WriteCapacityUnits: 1

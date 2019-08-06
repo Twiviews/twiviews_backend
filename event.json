@@ -1,0 +1,6 @@
+{
+  "body": "{\"review_id\": \"12345\",
+            \"text\":\"test\",
+            \"sentiment\":\"Positive\",
+            \"hashtag\":\"dummy\",
+            \"signal\":\"test\" }"
