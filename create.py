@@ -15,6 +15,12 @@ def handler(event, context):
     hashtag = body['hashtag']
     signal = body['signal']
 
+
+    #send the input data to Kinesis firehose
+    #generate sentiment
+    #research if I could return the data record from the kinesis itself. 
+
+
     put_response = table.put_item(
         Item = {
             'review_id': id,

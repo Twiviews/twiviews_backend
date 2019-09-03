@@ -2,6 +2,17 @@ service: reviewdb
 
 frameworkVersion: ">= 1.6.0 <2.0.0"
 
+package:
+  individually: true
+  include:
+    - lib/**/*
+  excludeDevDependencies: false
+
+custom:
+  pythonRequirements:
+    layer: true
+    zip: true
+
 provider:
   name: aws
   runtime: python3.7
@@ -13,7 +24,9 @@ provider:
       - dynamodb:Query
       - dynamodb:GetItem
       - dynamodb:PutItem
-    Resource: "arn:aws:dynamodb:us-east-1:603301334685:table/reviews_tbl"
+    Resource:
+        - { "Fn::GetAtt": ["ReviewsTable", "Arn"] } #you will also see the logical IDs below where they are provisioned
+        - { "Fn::GetAtt": ["CheckpointTable", "Arn"] }
 
 functions:
   create:
@@ -28,25 +41,48 @@ functions:
       - http:
           path: reviews/{review_hash}
           method: get
-  # fetch:
-  #   handler: fetch.handler
-  #   events:
-  #     - http:
-  #         path: reviews/{fetch}
-  #         method: get
 
-# resources:
-#   Resources:
-#     ReviewsTable:
-#       Type: AWS::DynamoDB::Table
-#       Properties:
-#         TableName: reviews_tbl
-#         AttributeDefinitions:
-#           - AttributeName: hashtag
-#             AttributeType: S
-#         KeySchema:
-#           - AttributeName: hashtag
-#             KeyType: HASH
-#         ProvisionedThroughput:
-#           ReadCapacityUnits: 1
-#           WriteCapacityUnits: 1
+  fetch:
+    handler: fetch.handler
+    layers:
+      - {Ref: PythonRequirementsLambdaLayer}
+    events:
+      - http:
+          path: fetch/{review_hash}
+          method: get
+
+  sentimentalize:
+    handler: sentimentalize.handler
+
+plugins:
+  - serverless-python-requirements
+
+
+resources:
+  Resources:
+    ReviewsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: reviews_tbl
+        AttributeDefinitions:
+          - AttributeName: hashtag
+            AttributeType: S
+        KeySchema:
+          - AttributeName: hashtag
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    CheckpointTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: checkpoints_tbl
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5

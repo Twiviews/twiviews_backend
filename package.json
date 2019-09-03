@@ -12,5 +12,8 @@
   "dependencies": {
     "aws-sdk": "^2.503.0",
     "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "serverless-python-requirements": "^5.0.0"
   }
 }

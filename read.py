@@ -22,7 +22,7 @@ def handler(event, context):
 
     response = {
         "statusCode": 200,
-        "body": json.dumps(get_response['Item'])
+        "body": json.dumps(get_response)
     }
 
     return response

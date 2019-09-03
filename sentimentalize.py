@@ -4,7 +4,7 @@ import base64
 import json
 import boto3
 
-def lambda_handler(event, context):
+def handler(event, context):
     output = []
 
     for record in event['records']:
@@ -19,12 +19,12 @@ def lambda_handler(event, context):
         positive = sentiment_all['SentimentScore']['Positive']
         negative = sentiment_all['SentimentScore']['Negative']
         signal = positive - negative
-        print(total)
+        print(signal)
 
         data_record = {
             'message': dict_data,
             'sentiment': sentiment,
-            'signal': total
+            'signal': signal
         }
         print(data_record)
 
