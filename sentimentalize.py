@@ -6,16 +6,14 @@ import boto3
 import uuid
 from decimal import Decimal
 
+import psycopg2
+
+from pgdbinit import pgdbinit
 
 
 def handler(event, context):
     output = []
     hashtag=''
-
-    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
-    table = dynamodb.Table('reviews_tbl')
-
-
 
     for record in event['records']:
 
@@ -37,17 +35,26 @@ def handler(event, context):
 
         id = str(uuid.uuid1())
 
-        put_response = table.put_item(
-            Item ={
-                'hashtag': hashtag,
-                'review_id': id,
-                'text': dict_data,
-                'sentiment': sentiment,
-                'signal': Decimal(signal)              
-                }
-            )
+        query_params_list = (id, hashtag, dict_data, sentiment, Decimal(signal))
 
-        print('put response{}'.format(put_response))
+        print(json.dumps(query_params_list))
+
+        sql = "INSERT INTO twiviews(id, hashtag, twiview, sentiment, signal) VALUES (%s)"
+        conn = None
+        try:
+            conn = pgdbinit.get_conn_rds()
+            cur = conn.cursor()
+
+            cur.executemany(sql, query_params_list)
+
+            conn.commit()
+
+            cur.close()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+        finally:
+            if conn is not None:
+                conn.close()
 
         data_record = {
             'id': record['recordId'],
@@ -57,16 +64,11 @@ def handler(event, context):
             'signal': signal
         }
 
-
-
-        print(data_record)
-
         output_record = {
             'recordId': record['recordId'],
             'result': 'Ok',
             'data': base64.b64encode(json.dumps(data_record).encode('utf-8')).decode('utf-8')
         }
-        print(output_record)
 
         output.append(output_record)
 

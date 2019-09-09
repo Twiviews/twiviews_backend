@@ -5,7 +5,7 @@ frameworkVersion: ">= 1.6.0 <2.0.0"
 package:
   individually: true
   include:
-    - lib/**/*
+    - psycopg2/**/*
   excludeDevDependencies: false
 
 custom:
@@ -15,28 +15,23 @@ custom:
 
 provider:
   name: aws
-  runtime: python3.7
+  runtime: python3.6
   stage: dev
   region: us-east-1
-  iamRoleStatements:
-  - Effect: Allow
-    Action:
-      - dynamodb:Query
-      - dynamodb:GetItem
-      - dynamodb:PutItem
-    Resource:
-        - { "Fn::GetAtt": ["ReviewsTable", "Arn"] } #you will also see the logical IDs below where they are provisioned
-        - { "Fn::GetAtt": ["CheckpointTable", "Arn"] }
 
 functions:
   create:
     handler: create.handler
+    layers:
+      - {Ref: PythonRequirementsLambdaLayer}
     events:
       - http:
           path: reviews
           method: post
   read:
     handler: read.handler
+    layers:
+      - {Ref: PythonRequirementsLambdaLayer}
     events:
       - http:
           path: reviews/{review_hash}
@@ -53,36 +48,8 @@ functions:
 
   sentimentalize:
     handler: sentimentalize.handler
+    layers:
+      - {Ref: PythonRequirementsLambdaLayer}
 
 plugins:
   - serverless-python-requirements
-
-
-resources:
-  Resources:
-    ReviewsTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: reviews_tbl
-        AttributeDefinitions:
-          - AttributeName: hashtag
-            AttributeType: S
-        KeySchema:
-          - AttributeName: hashtag
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
-    CheckpointTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: checkpoints_tbl
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5

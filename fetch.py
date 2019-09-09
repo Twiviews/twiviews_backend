@@ -4,6 +4,9 @@ import boto3
 from twitter import *
 import base64
 import re
+
+from twitter.parse_tweet import ParseTweet
+
 import twitter_proxy
 import checkpoint
 

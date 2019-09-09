@@ -2,40 +2,52 @@ from __future__ import print_function # Python 2/3 compatibility
 import json
 import boto3
 import uuid
+from pgdbinit import pgdbinit
+import psycopg2
 
 def handler(event, context):
     print('received create event{}'.format(event))
-    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
-    table = dynamodb.Table('reviews_tbl')
+
+    query_param_list = None
+
     id = str(uuid.uuid1())
 
     body = json.loads(event['body'])
-    text = body['text']
-    sentiment = body['sentiment']
+
     hashtag = body['hashtag']
+    twiview = body['twiview']
+    sentiment = body['sentiment']
     signal = body['signal']
 
 
-    #send the input data to Kinesis firehose
-    #generate sentiment
-    #research if I could return the data record from the kinesis itself. 
+    query_params_list = (id, hashtag, twiview, sentiment, signal)
+
+    sql = "INSERT INTO twiviews(id, hashtag, twiview, sentiment, signal) VALUES (%s, '{1}', '{2}', '{3}', %s);"
+    conn = None
+    try:
+
+        conn = pgdbinit.get_conn_rds()
+
+        cur = conn.cursor()
+
+        cur.execute(sql, query_param_list)
+
+        conn.commit()
+
+        cur.close()
+
+        response = {
+            "statusCode": 200,
+            "body": json.dumps({"id": id})
+        }
+
+        return response
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
 
 
-    put_response = table.put_item(
-        Item = {
-            'review_id': id,
-            'text': text,
-            'sentiment': sentiment,
-            'hashtag': hashtag,
-            'signal': signal
-            }
-        )
 
-    print('put response{}'.format(put_response))
-
-    response = {
-        "statusCode": 200,
-        "body": json.dumps({"review_id": id})
-    }
-
-    return response
