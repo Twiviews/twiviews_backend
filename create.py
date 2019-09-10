@@ -22,7 +22,9 @@ def handler(event, context):
 
     query_params_list = (id, hashtag, twiview, sentiment, signal)
 
-    sql = "INSERT INTO twiviews(id, hashtag, twiview, sentiment, signal) VALUES (%s, '{1}', '{2}', '{3}', %s);"
+    sql = ('INSERT INTO public."twiviews"(id, hashtag, twiview, sentiment, signal) ' +
+           'VALUES (%(id)s, %(hashtag)s, %(twiview)s, %(sentiment)s, %(signal)s);')
+
     conn = None
     try:
 
