@@ -10,15 +10,23 @@ from twitter.parse_tweet import ParseTweet
 import twitter_proxy
 import checkpoint
 
-STREAM_MODE_ENABLED = False
+STREAM_MODE_ENABLED = True
 since_id = None
 BATCH_SIZE = 100
 search_keyword=''
-ACCESS_KEY= 'AKIAYY54PZ2OXM5PH63Q'
-SECRET_KEY= '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'
+
+#rvdb
+#ACCESS_KEY= 'AKIAYY54PZ2OXM5PH63Q'
+#SECRET_KEY= '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'
+
+
+#nvdb
+ACCESS_KEY = 'AKIAWRTZ4VAOWKYFZ2WI'
+SECRET_KEY = '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'
+
 DeliveryStreamName = 'review-stream'
-most_recent_tweet = None
 tweets = []
+
 
 def handler(event, context):
     print('received fetch event{}'.format(event))
@@ -58,11 +66,10 @@ def handler(event, context):
 
 
 def _search(search_keyword):
-    since_id = None
+
     if STREAM_MODE_ENABLED:
         since_id = checkpoint.last_id()
 
-    tweets = []
     while True:
         result = twitter_proxy.search(search_keyword, since_id)
         if not result['statuses']:

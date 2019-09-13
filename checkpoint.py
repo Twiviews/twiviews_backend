@@ -5,35 +5,65 @@ import os
 import boto3
 from boto3.dynamodb.conditions import Attr, Or
 from botocore.exceptions import ClientError
-
-DDB = boto3.resource('dynamodb')
-TABLE = DDB.Table('checkpoints_tbl')
-RECORD_KEY = 'checkpoint'
+from pgdbinit import pgdbinit
+import psycopg2
+import json
 
 
 def last_id():
     """Return last checkpoint tweet id."""
-    result = TABLE.get_item(
-        Key={'id': RECORD_KEY}
-    )
-    if 'Item' in result:
-        return result['Item']['since_id']
+
+    last_sinceid_sql = ('select since_id from public."checkpoint";')
+
+    conn = None
+    resultset = None
+    try:
+
+        conn = pgdbinit.get_conn_rds( )
+
+        cur = conn.cursor( )
+
+        cur.execute(last_sinceid_sql)
+        row = cur.fetchone( )
+
+        if row is not None:
+            resultset = row
+
+        cur.close( )
+
+        conn.commit( )
+
+        return resultset[ 0 ]
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close( )
+
     return None
 
 
 def update(since_id):
     """Update checkpoint to given tweet id."""
+
+    update_sinceid_sql = ''' update public."checkpoint" set since_id =  %s '''
+
     try:
-        TABLE.put_item(
-            Item={
-                'id': RECORD_KEY,
-                'since_id': since_id
-            },
-            ConditionExpression=Or(
-                Attr('id').not_exists(),
-                Attr('since_id').lt(since_id)
-            )
-        )
+        conn = pgdbinit.get_conn_rds()
+
+        cur = conn.cursor()
+
+        cur.execute(update_sinceid_sql, (since_id,))
+        cur.close()
+        conn.commit()
+
+        print("Update of since_id successful!")
+
     except ClientError as e:
-        if e.response['Error']['Code'] != 'ConditionalCheckFailedException':
-            raise
+        raise
+
+
+if __name__ == '__main__':
+    if (last_id() == 1):
+        update(0)

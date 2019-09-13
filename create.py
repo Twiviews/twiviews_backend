@@ -10,7 +10,7 @@ def handler(event, context):
 
     query_param_list = None
 
-    id = str(uuid.uuid1())
+    id = str(uuid.uuid4())
 
     body = json.loads(event['body'])
 
@@ -19,11 +19,12 @@ def handler(event, context):
     sentiment = body['sentiment']
     signal = body['signal']
 
-
-    query_params_list = (id, hashtag, twiview, sentiment, signal)
-
-    sql = ('INSERT INTO public."twiviews"(id, hashtag, twiview, sentiment, signal) ' +
-           'VALUES (%(id)s, %(hashtag)s, %(twiview)s, %(sentiment)s, %(signal)s);')
+    sql = '''
+    
+    INSERT INTO public."twiviews"(id, hashtag, twiview, sentiment, signal)
+            VALUES (%(twiid)s, %(hashtag)s, %(twiview)s, %(sentiment)s, %(signal)s);
+    
+    '''
 
     conn = None
     try:
@@ -31,6 +32,8 @@ def handler(event, context):
         conn = pgdbinit.get_conn_rds()
 
         cur = conn.cursor()
+
+        query_params_list = {'twiid': id, 'hashtag': hashtag, 'twiview': twiview, 'sentiment': sentiment, 'signal': signal}
 
         cur.execute(sql, query_param_list)
 

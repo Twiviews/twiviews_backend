@@ -9,14 +9,24 @@ connection = None
 def create_tables():
     # provide sql statements
 
-    create_table_query = '''
-        CREATE TABLE twiviews
-        (   id SERIAL PRIMARY KEY,
-            hashtag VARCHAR(255) NOT NULL,
-            twiview VARCHAR(255) NOT NULL,
-            sentiment VARCHAR(255) NOT NULL,
-            signal Decimal NOT NULL
-        );'''
+    create_twiviews_table_query = '''
+        
+        CREATE TABLE public."twiviews"(
+                        id text COLLATE pg_catalog."default" NOT NULL PRIMARY KEY, 
+                        hashtag text COLLATE pg_catalog."default" NOT NULL,
+                        twiview text COLLATE pg_catalog."default" NOT NULL,
+                        sentiment text COLLATE pg_catalog."default" NOT NULL,
+                        signal double precision NOT NULL
+                        );
+        
+        '''
+
+    create_checkpoint_table_query = '''
+    
+    CREATE TABLE public."checkpoint"(since_id NUMERIC not null primary key);
+    
+    '''
+
 
     try:
 
@@ -24,10 +34,11 @@ def create_tables():
 
         cur = connection.cursor()
 
-        cur.execute(create_table_query)
+        cur.execute(create_twiviews_table_query)
+        cur.execute(create_checkpoint_table_query)
         connection.commit()
 
-        print("twiviews Table created successfully in rvwdbpg")
+        print("twiviews, checkpoint Tables created successfully in rvwdbpg")
 
         cur.close()
         connection.commit()
@@ -46,8 +57,9 @@ def get_conn_rds():
 
         connection = psycopg2.connect(user = "postgres",
                                   password = "LKdB5SuyDYXEEBpQ6ph6",
-                                  host = "rvwdbpg.cpn2q9h6h0ua.us-east-1.rds.amazonaws.com",
-                                  port = "5432",
+                                  #host = "rvwdbpg.cpn2q9h6h0ua.us-east-1.rds.amazonaws.com", # --rvdb
+                                  host = "rvwdbpg.cwslyap2b0lw.us-east-1.rds.amazonaws.com",  # --nvdb
+                                   port = "5432",
                                   database = "postgres")
 
         return connection
