@@ -23,7 +23,7 @@ def handler(event, context):
 
         conn = pgdbinit.get_conn_rds()
         cur = conn.cursor()
-        cur.execute(sql)
+        cur.execute(sql,)
 
         row = cur.fetchone()
 
