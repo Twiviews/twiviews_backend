@@ -13,7 +13,7 @@ def handler(event, context):
     hashtag = pathParameters['review_hash']
 
     sql = '''
-            SELECT * FROM twiviews where hashtag = ? ORDER BY hashtag;
+            SELECT * FROM twiviews where hashtag = %(hashtag)s ORDER BY hashtag;
             '''
     conn = None
 
@@ -23,18 +23,18 @@ def handler(event, context):
 
         conn = pgdbinit.get_conn_rds()
         cur = conn.cursor()
-        cur.execute(sql,)
+        cur.execute(sql,
+                    {'hashtag': hashtag})
 
         row = cur.fetchone()
 
-        json_doc = {'id': row[ 0 ],
-                    'hashtag': row[ 1 ],
-                    'twiview': row[ 2 ],
-                    'sentiment': row[ 3 ],
-                    'signal': row[ 4 ]
-                    }
-
         while row is not None:
+            json_doc = {'id': row[ 0 ],
+                       'hashtag': row[ 1 ],
+                       'twiview': row[ 2 ],
+                       'sentiment': row[ 3 ],
+                       'signal': row[ 4 ]
+                       }
             get_response.append(json.dumps(json_doc))
             row = cur.fetchone()
 
