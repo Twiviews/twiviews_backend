@@ -16,12 +16,19 @@ try:  # connect to PostgreSQL
     # open a cursor to access data
     cur = conn.cursor()
 
-    cur.execute(
-    """
-    INSERT INTO public."twiviews"(id, hashtag, twiview, sentiment, signal)
-        VALUES (%(twiid)s, %(hashtag)s, %(twiview)s, %(sentiment)s, %(signal)s);
-         """,
-    {'twiid': str(uuid.uuid4()), 'hashtag': "#O'Reilly", 'twiview': "twiview", 'sentiment': "positive", 'signal': 0.4})
+    sql = """
+          INSERT INTO public."twiviews"(id, hashtag, twiview, sentiment, signal)
+          VALUES (%(twiid)s, %(hashtag)s, %(twiview)s, %(sentiment)s, %(signal)s);
+          """
+    query_params_list = {'twiid': id, 'hashtag': "#O'Reilly", 'twiview': "twiview", 'sentiment': "positive", 'signal': 0.4}
+
+    cur.execute(sql, query_params_list)
+    # cur.execute(
+    # """
+    # INSERT INTO public."twiviews"(id, hashtag, twiview, sentiment, signal)
+    #     VALUES (%(twiid)s, %(hashtag)s, %(twiview)s, %(sentiment)s, %(signal)s);
+    #      """,
+    # {'twiid': str(uuid.uuid4()), 'hashtag': "#O'Reilly", 'twiview': "twiview", 'sentiment': "positive", 'signal': 0.4})
 
     conn.commit()
     cur.close()

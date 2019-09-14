@@ -35,7 +35,7 @@ def handler(event, context):
 
         query_params_list = {'twiid': id, 'hashtag': hashtag, 'twiview': twiview, 'sentiment': sentiment, 'signal': signal}
 
-        cur.execute(sql, query_param_list)
+        cur.execute(sql, query_params_list)
 
         conn.commit()
 

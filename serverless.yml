@@ -6,6 +6,8 @@ package:
   individually: true
   include:
     - psycopg2/**/*
+  exclude:
+    - venv/**/*
   excludeDevDependencies: false
 
 custom:
