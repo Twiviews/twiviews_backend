@@ -8,6 +8,7 @@ package:
     - psycopg2/**/*
   exclude:
     - venv/**/*
+    - ./.aws-sam/**/*
   excludeDevDependencies: false
 
 custom:

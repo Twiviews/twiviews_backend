@@ -13,11 +13,11 @@ def handler(event, context):
     hashtag = pathParameters['review_hash']
 
     sql = '''
-            SELECT * FROM twiviews ORDER BY hashtag;
+            SELECT * FROM twiviews where hashtag = ? ORDER BY hashtag;
             '''
     conn = None
 
-    get_response = {}
+    get_response = []
 
     try:
 
@@ -27,9 +27,15 @@ def handler(event, context):
 
         row = cur.fetchone()
 
-        print(row[0])
+        json_doc = {'id': row[ 0 ],
+                    'hashtag': row[ 1 ],
+                    'twiview': row[ 2 ],
+                    'sentiment': row[ 3 ],
+                    'signal': row[ 4 ]
+                    }
+
         while row is not None:
-            get_response.append(json.dumps(row[0]))
+            get_response.append(json.dumps(json_doc))
             row = cur.fetchone()
 
         cur.close()
