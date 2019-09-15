@@ -13,7 +13,7 @@ def handler(event, context):
     hashtag = pathParameters['review_hash']
 
     sql = '''
-            SELECT * FROM twiviews where hashtag = %(hashtag)s ORDER BY hashtag;
+            SELECT * FROM twiviews where hashtag = %(hashtag)s ORDER BY id desc;
             '''
     conn = None
 
@@ -35,7 +35,7 @@ def handler(event, context):
                        'sentiment': row[ 3 ],
                        'signal': row[ 4 ]
                        }
-            get_response.append(json.dumps(json_doc))
+            get_response.append(json_doc)
             row = cur.fetchone()
 
         cur.close()
