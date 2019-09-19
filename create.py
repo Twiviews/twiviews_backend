@@ -5,54 +5,37 @@ import uuid
 from pgdbinit import pgdbinit
 import psycopg2
 
+#nvdb
+ACCESS_KEY = 'AKIAWRTZ4VAOWKYFZ2WI'
+SECRET_KEY = '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'
+
+DeliveryStreamName = 'review-stream'
+
 def handler(event, context):
     print('received create event{}'.format(event))
 
     query_param_list = None
 
-    id = str(uuid.uuid4())
+    client = boto3.client('firehose',
+                          region_name='us-east-1',
+                          aws_access_key_id=ACCESS_KEY,
+                          aws_secret_access_key=SECRET_KEY
+                          )
 
     body = json.loads(event['body'])
 
-    hashtag = body['hashtag']
     twiview = body['twiview']
-    sentiment = body['sentiment']
-    signal = body['signal']
 
-    sql = '''
-    
-    INSERT INTO public."twiviews"(id, hashtag, twiview, sentiment, signal)
-            VALUES (%(twiid)s, %(hashtag)s, %(twiview)s, %(sentiment)s, %(signal)s);
-    
-    '''
-
-    conn = None
     try:
+        client.put_record(DeliveryStreamName=DeliveryStreamName, Record={'Data': twiview})
+    except Exception as e:
+        print(e)
 
-        conn = pgdbinit.get_conn_rds()
+    response = {
+        "statusCode": 200
+    }
 
-        cur = conn.cursor()
-
-        query_params_list = {'twiid': id, 'hashtag': hashtag, 'twiview': twiview, 'sentiment': sentiment, 'signal': signal}
-
-        cur.execute(sql, query_params_list)
-
-        conn.commit()
-
-        cur.close()
-
-        response = {
-            "statusCode": 200,
-            "body": json.dumps({"id": id})
-        }
-
-        return response
-
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        if conn is not None:
-            conn.close()
+    return response
 
 
 
