@@ -5,7 +5,8 @@ from twitter import *
 import base64
 import re
 
-from twitter.parse_tweet import ParseTweet
+from twitter.parse_tweet import *
+from response import response
 
 import twitter_proxy
 import checkpoint
@@ -57,12 +58,7 @@ def handler(event, context):
     except Exception as e: # take care of all those ugly errors if there are some
         print(e)
 
-    response = {
-        "statusCode": 200,
-        "body": json.dumps({"most_recent_tweet_id": since_id})
-    }
-
-    return response
+    return response({'message': 'Successfully put record into delivery stream'}, 200)
 
 
 def _search(search_keyword):

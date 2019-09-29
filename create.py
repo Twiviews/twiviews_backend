@@ -3,6 +3,7 @@ import json
 import boto3
 import uuid
 from pgdbinit import pgdbinit
+from response import response
 import psycopg2
 
 #nvdb
@@ -31,11 +32,7 @@ def handler(event, context):
     except Exception as e:
         print(e)
 
-    response = {
-        "statusCode": 200
-    }
-
-    return response
+    return  response({'message': 'Successfully put record into delivery stream'}, 200)
 
 
 

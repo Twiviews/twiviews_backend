@@ -4,6 +4,8 @@ import boto3
 import psycopg2
 
 from pgdbinit import pgdbinit
+from response import response
+
 
 def handler(event, context):
 
@@ -45,9 +47,4 @@ def handler(event, context):
         if conn is not None:
             conn.close()
 
-    response = {
-        "statusCode": 200,
-        "body": json.dumps(get_response)
-    }
-
-    return response
+    return response({'message': get_response}, 200)
