@@ -29,6 +29,8 @@ DeliveryStreamName = 'review-stream'
 tweets = []
 
 
+# {"pathParameters": {"review_hash" : "JAANU"}} for testing lambda on aws #
+
 def handler(event, context):
     print('received fetch event{}'.format(event))
 
